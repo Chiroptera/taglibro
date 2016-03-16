@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import os.path
 import datetime
@@ -11,8 +12,6 @@ if __name__ == '__main__':
 	import tempfile
 
 	TEMP_DIR = tempfile.gettempdir()
-	WEEKLY_ENTRY_NAME = u'weekly_entry.html'
-	WEEKLY_PATH = os.path.join(TEMP_DIR,WEEKLY_ENTRY_NAME)
 
 # def to_unicode_or_bust(obj, encoding='utf-8'):
 # 	if isinstance(obj, basestring):
@@ -85,6 +84,8 @@ def parse_entries(file_path):
 	# read file
 	f = open(file_path, 'r')
 	lines = f.readlines()
+	if len(lines) == 0:
+		return []
 	ed_list = list()
 
 	# parse entries - reads only metadata
@@ -259,10 +260,26 @@ def get_week_entries(entry_list, output_path,
 							tags_exclude=tags_exclude)
 	html_from_entries2(week_list, output_path)
 
+def get_month_entries(entry_list, output_path):
+	monthly_list = filter(lambda x: 'månad' in x.tag, entry_list)
+
+	if len(monthly_list) is not 0:
+		entry = None
+		for entry in monthly_list:
+			pass		
+		monthly_last_date = entry.date
+	else:
+		monthly_last_date = entry_list[0].date
+
+	monthly_list = get_entries(entry_list, start_date=monthly_last_date)
+	html_from_entries2(monthly_list, output_path)	
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Journal access.')
 	parser.add_argument('-w', '--weekly', action='store_true',
 						help='Compile all entries from the last weekly entry.')
+	parser.add_argument('-m', '--monthy', action='store_true',
+						help='Compile all "vecka" entries from the last monthly entry.')
 	parser.add_argument('-et', '--exclude-tag', nargs='+', type=str, default=None,
 						help='Specify which tags to exclude.')
 	parser.add_argument('-it', '--include-tag', nargs='+', type=str, default=None,
@@ -306,10 +323,19 @@ if __name__ == '__main__':
 	entry_list.sort(key=lambda x: x.date)
 
 	if args.weekly:
-		get_week_entries(entry_list, WEEKLY_PATH,
+		path = os.path.join(TEMP_DIR, 'weekly_entry.html')
+		get_week_entries(entry_list, path,
 						 tags_include=args.include_tag,
 						 tags_exclude=args.exclude_tag)
 
 		ans = input('Open in browser? (y/n)')
 		if ans in ['y','Y']:
-			webbrowser.open(WEEKLY_PATH, new=0, autoraise=True)
+			webbrowser.open(path, new=0, autoraise=True)
+
+	if args.monthly:
+		path = os.path.join(TEMP_DIR, 'monthly_entry.html')
+		get_month_entries(entry_list, path)
+
+		ans = input('Open in browser? (y/n)')
+		if ans in ['y','Y']:
+			webbrowser.open(path, new=0, autoraise=True)
