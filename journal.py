@@ -6,6 +6,8 @@ import pypandoc
 import functools
 import warnings
 
+from config import *
+
 if __name__ == '__main__':
     import webbrowser
     import argparse
@@ -18,7 +20,7 @@ if __name__ == '__main__':
 
     # If this is Python 2, use raw_input()
     if sys.version_info[:2] <= (2, 7):
-        get_input = raw_input    
+        get_input = raw_input
 
     TEMP_DIR = tempfile.gettempdir()
 
@@ -28,14 +30,6 @@ if __name__ == '__main__':
 #             obj = unicode(obj, encoding)
 #     return obj
 
-JOURNAL_PATH = u'/home/chiroptera/Dropbox/journal'
-DROPBOX_IGNORE_CONFLICTED_COPIES = True
-BEFORE_BODY_TEMPLATE = u'/home/chiroptera/workspace/journal_app/before_body_code.html'
-AFTER_BODY_TEMPLATE = u'/home/chiroptera/workspace/journal_app/after_body_code.html'
-
-ENTRY_SEPARATOR_IMG = u'/home/chiroptera/workspace/journal_app/rsc/entry_separator.png'
-ENTRY_SEPARATOR_MD = u'\n* * *\n'
-HLINE_HTML = u'<hr />'
 
 class Entry:
     """Object to hold metadata of each journal entry."""
@@ -52,21 +46,23 @@ class Entry:
         self.line_end = line_end
 
     def parse_field(self, field, value):
-        if field in ('tag','tags'):
+        if field in ('tag', 'tags'):
             if isinstance(value, list):
                 self.tag = value
             else:
                 raise TypeError('Value of tag must be a list of strings.')
         elif field == 'date':
             try:
-                self.date = datetime.datetime.strptime(value[0], '%d-%m-%Y').date()
+                self.date = datetime.datetime.strptime(value[0], '%d-%m-%Y').\
+                            date()
             except ValueError:
                 print('Wrong date formating in file: {}'.format(self.path))
         elif field == 'time':
             try:
-                self.time = datetime.datetime.strptime(value[0], '%H:%M').time()
+                self.time = datetime.datetime.strptime(value[0], '%H:%M').\
+                            time()
             except ValueError:
-                print('Wrong time formating in file: {}'.format(self.path))            
+                print('Wrong time formating in file: {}'.format(self.path))
         elif field == 'location':
             if isinstance(value, list):
                 self.location = value
@@ -74,21 +70,26 @@ class Entry:
                 raise TypeError('Value of location must be a list of strings.')
         else:
             print('Skipping metafield with name: {}'.format(field))
-            # raise warnings.warn('Skipping metafield with name: {}'.format(field), DeprecationWarning)
+            # raise warnings.warn('Skipping metafield with name: {}'.\
+            #                     format(field), DeprecationWarning)
 
     def get_valid_metadata(self):
         out_dict = dict()
         if self.date is not None:
-            out_dict['date'] =  u'{}-{}-{}'.format(self.date.day, self.date.month, self.date.year)
+            out_dict['date'] = u'{}-{}-{}'.format(self.date.day,
+                                                  self.date.month,
+                                                  self.date.year)
         if self.time is not None:
-            out_dict['time'] =  u'{}:{}'.format(self.time.hour, self.time.minute)
+            out_dict['time'] = u'{}:{}'.format(self.time.hour,
+                                               self.time.minute)
         if self.location is not None:
-            out_dict['location'] =  u', '.join(self.location)
+            out_dict['location'] = u', '.join(self.location)
         if self.tag is not None:
-            out_dict['tag'] =  u', '.join(self.tag)
+            out_dict['tag'] = u', '.join(self.tag)
 
         return out_dict
- 
+
+
 def parse_entries(file_path):
     # read file
     f = open(file_path, 'r')
@@ -118,7 +119,8 @@ def parse_entries(file_path):
 
         # metadata line
         elif metadata:
-            metafield, value = line.split(':', 1) # max of 1 split - important for time
+            # max of 1 split - important for time
+            metafield, value = line.split(':', 1)
             value = value.split(',')
             value = [v.strip() for v in value]
 
@@ -131,14 +133,15 @@ def parse_entries(file_path):
         print('hello')
     return ed_list
 
+
 def compile_to_html(text, output_path):
     f1 = open(BEFORE_BODY_TEMPLATE, 'r')
     f2 = open(AFTER_BODY_TEMPLATE, 'r')
 
-    output = f1.read() # header with style
+    output = f1.read()  # header with style
     # output += pypandoc.convert(text, 'html', format='md') # text body
     output += text
-    output += f2.read() # closing statements
+    output += f2.read()  # closing statements
 
     fo = open(output_path, 'w')
     output = output.encode('utf-8')
@@ -173,10 +176,11 @@ def get_entries(entry_list, start_date=None, end_date=None,
                 if e in tags_exclude:
                     return False
             return True
-        working_list = filter(check_common_tag_exclude, working_list)    
+        working_list = filter(check_common_tag_exclude, working_list)
         working_list = [e for e in working_list]
 
     return working_list
+
 
 def html_from_entries(entry_list, output_path):
     # sort entries
@@ -198,15 +202,16 @@ def html_from_entries(entry_list, output_path):
         txt = txt.split('---\n')[1:]
         text_list.extend(txt)
 
-    end_of_entry = u'<img src="{}" style="horizontal-align:middle" />'.format(ENTRY_SEPARATOR_IMG)
+    end_of_entry = u'<img src="{}" style="horizontal-align:middle" />'.\
+                   format(ENTRY_SEPARATOR_IMG)
 
     # assemble all texts in html body
     output_txt = u''
     for i in range(0, len(text_list), 2):
         entry_meta = text_list[i]
         entry_meta = entry_meta.splitlines()
-        entry_meta = map(lambda x: '<p>{}</p>'.format(x),entry_meta)
-        entry_meta = functools.reduce(lambda x,y: x+y, entry_meta)
+        entry_meta = map(lambda x: '<p>{}</p>'.format(x), entry_meta)
+        entry_meta = functools.reduce(lambda x, y: x+y, entry_meta)
         # entry_meta = to_unicode_or_bust(entry_meta)
 
         entry_txt = text_list[i+1]
@@ -214,10 +219,11 @@ def html_from_entries(entry_list, output_path):
         entry_txt = pypandoc.convert(entry_txt, 'html', format='md')
 
         output_txt = u'{}\n{}\n{}\n{}\n{}\n'.format(output_txt,
-                                                       entry_meta, HLINE_HTML,
-                                                       entry_txt, end_of_entry)
+                                                    entry_meta, HLINE_HTML,
+                                                    entry_txt, end_of_entry)
 
     compile_to_html(output_txt, output_path)
+
 
 def html_from_entries2(entry_list, output_path):
     # sort entries
@@ -236,7 +242,8 @@ def html_from_entries2(entry_list, output_path):
             alllines = f.readlines()
             entry_texts[e] = ''.join(alllines[e.line_start:e.line_end+1])
 
-    end_of_entry = u'<img src="{}" style="horizontal-align:middle" />'.format(ENTRY_SEPARATOR_IMG)
+    end_of_entry = u'<img src="{}" style="horizontal-align:middle" />'.\
+                   format(ENTRY_SEPARATOR_IMG)
 
     # assemble all texts in html body
     output_txt = u''
@@ -247,13 +254,14 @@ def html_from_entries2(entry_list, output_path):
         for metafield, value in metadata.items():
             metatext = '{}<p>{}: {}</p>\n'.format(metatext, metafield, value)
         output_txt = u'{}\n{}\n{}'.format(output_txt,
-                                         metatext,
-                                         HLINE_HTML)
+                                          metatext,
+                                          HLINE_HTML)
         # write entry text
         html_text = pypandoc.convert(entry_texts[e], 'html', format='md')
         output_txt = u'{}{}\n{}\n'.format(output_txt, html_text, end_of_entry)
 
     compile_to_html(output_txt, output_path)
+
 
 def get_week_entries(entry_list, output_path,
                      tags_include=None, tags_exclude=None):
@@ -269,29 +277,48 @@ def get_week_entries(entry_list, output_path,
                             tags_exclude=tags_exclude)
     html_from_entries2(week_list, output_path)
 
+
+def tagcloud(entry_list):
+    tags = dict()
+    for e in entry_list:
+        for t in e.tag:
+            if t not in tags:
+                tags[t] = 1
+            tags[t] += 1
+    return tags
+
+
 def get_month_entries(entry_list, output_path):
-    monthly_list = filter(lambda x: 'månad' in x.tag, entry_list)
+    monthly_list = filter(lambda x: 'manad' in x.tag, entry_list)
 
     if len(monthly_list) is not 0:
         entry = None
         for entry in monthly_list:
-            pass        
+            pass
         monthly_last_date = entry.date
     else:
         monthly_last_date = entry_list[0].date
 
-    monthly_list = get_entries(entry_list, start_date=monthly_last_date)
-    html_from_entries2(monthly_list, output_path)    
+    monthly_list = get_entries(entry_list, start_date=monthly_last_date,
+                               tags_include='vecka')
+    html_from_entries2(monthly_list, output_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Journal access.')
+    # output parameters
     parser.add_argument('-w', '--weekly', action='store_true',
                         help='Compile all entries from the last weekly entry.')
     parser.add_argument('-m', '--monthly', action='store_true',
                         help='Compile all "vecka" entries from the last monthly entry.')
-    parser.add_argument('-et', '--exclude-tag', nargs='+', type=str, default=None,
+    parser.add_argument('-t', '--tagcloud', action='store_true',
+                        help='Return list of all tags.')
+
+    # specialization parameters
+    parser.add_argument('-et', '--exclude-tag', nargs='+',
+                        type=str, default=None,
                         help='Specify which tags to exclude.')
-    parser.add_argument('-it', '--include-tag', nargs='+', type=str, default=None,
+    parser.add_argument('-it', '--include-tag', nargs='+',
+                        type=str, default=None,
                         help='Specify which tags to include.')
 
     args = parser.parse_args()
@@ -318,7 +345,7 @@ if __name__ == '__main__':
         if 'conflicted copy' in string:
             return False
         return True
-    
+
     if DROPBOX_IGNORE_CONFLICTED_COPIES:
         path_list = filter(not_conflicted_copy, path_list)
         path_list = [p for p in path_list]
@@ -331,6 +358,14 @@ if __name__ == '__main__':
     # sort all entries by date
     entry_list.sort(key=lambda x: x.date)
 
+    # -------------------------------------------------------------------
+
+    if args.tagcloud:
+        tags = tagcloud(entry_list)
+        print tags
+        print tags.keys()
+        sys.exit(0)
+
     if args.weekly:
         path = os.path.join(TEMP_DIR, 'weekly_entry.html')
         get_week_entries(entry_list, path,
@@ -339,13 +374,28 @@ if __name__ == '__main__':
 
         ans = get_input('Open in browser? (y/n)')
         print ans, type(ans)
-        if ans in ['y','Y']:
+        if ans in ['y', 'Y']:
             webbrowser.open(path, new=0, autoraise=True)
+
+        sys.exit(0)
 
     if args.monthly:
         path = os.path.join(TEMP_DIR, 'monthly_entry.html')
         get_month_entries(entry_list, path)
 
         ans = get_input('Open in browser? (y/n)')
-        if ans in ['y','Y']:
+        if ans in ['y', 'Y']:
             webbrowser.open(path, new=0, autoraise=True)
+
+        sys.exit(0)
+
+    path = os.path.join(TEMP_DIR, 'entries.html')
+    entries = get_entries(entry_list, tags_include=args.include_tag,
+                          tags_exclude=args.exclude_tag)
+    html_from_entries2(entries, path)
+    ans = get_input('Open in browser? (y/n)')
+    if ans in ['y', 'Y']:
+        webbrowser.open(path, new=0, autoraise=True)
+
+    sys.exit(0)
+    pass
