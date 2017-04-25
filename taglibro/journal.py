@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 import os.path
 import datetime
@@ -309,7 +310,8 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--weekly', action='store_true',
                         help='Compile all entries from the last weekly entry.')
     parser.add_argument('-m', '--monthly', action='store_true',
-                        help='Compile all "vecka" entries from the last monthly entry.')
+                        help='Compile all "vecka" entries from the last '
+                             'monthly entry.')
     parser.add_argument('-t', '--tagcloud', action='store_true',
                         help='Return list of all tags.')
 
@@ -325,9 +327,10 @@ if __name__ == '__main__':
 
     # list of absolute paths of all entries
     path_list = list()
-    for root, dirs, files in os.walk(JOURNAL_PATH):
-        for name in files:
-            path_list.append(os.path.join(root, name))
+    for path in JOURNAL_PATHS:
+        for root, dirs, files in os.walk(path):
+            for name in files:
+                path_list.append(os.path.join(root, name))
 
     # remove files not of .md or .markdown extension
     def is_correct_type(path):
@@ -362,8 +365,8 @@ if __name__ == '__main__':
 
     if args.tagcloud:
         tags = tagcloud(entry_list)
-        print tags
-        print tags.keys()
+        print(tags)
+        print(tags.keys())
         sys.exit(0)
 
     if args.weekly:
@@ -373,7 +376,7 @@ if __name__ == '__main__':
                          tags_exclude=args.exclude_tag)
 
         ans = get_input('Open in browser? (y/n)')
-        print ans, type(ans)
+        print(ans, type(ans))
         if ans in ['y', 'Y']:
             webbrowser.open(path, new=0, autoraise=True)
 

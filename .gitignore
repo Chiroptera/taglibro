@@ -1,3 +1,7 @@
 output/
 *.pyc
 .directory
+**__pycache__/
+taglibro.egg-info/
+build/
+dist/
