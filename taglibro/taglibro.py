@@ -5,10 +5,13 @@ import os.path
 import datetime
 import pypandoc
 
-import taglibro.config as config
+import taglibro.config
+config = taglibro.config.get_config()
+
 
 class Entry:
     def __init__(self, path):
+        print(path)
         if not os.path.exists(path):
             raise Exception('file does not exist')
 
@@ -37,6 +40,7 @@ class Entry:
     def parse(self):
         with open(self.path, 'r') as f:
             txt = f.read()
+        print(self.path, txt)
         self.parse_header(txt)
         self.parse_body(txt)
 
@@ -90,28 +94,22 @@ class Entry:
     def __repr__(self):
         return '<Entry(date={} tag={})>'.format(self.date, self.tags)
 
-import time
+
 def get_entry_list():
-    entry_dirs = config.JOURNAL_PATHS
+    entry_dirs = config['journal_paths']
     entry_paths = []
-    start = time.time()
     for edir in entry_dirs:
         if not os.path.exists(edir):
             raise Exception('entry directory does not exist')
         for root, folders, files in os.walk(edir):
             valid_files = [os.path.join(root, f)
-                                for f in files if f[-3:] == '.md']
+                            for f in files if f[-3:] == '.md']
             entry_paths += valid_files
-    print('walking files time:', time.time() - start)
-    start = time.time()
     entries = [Entry(p) for p in entry_paths]
-    print('crating entries time:', time.time() - start)
-    start = time.time()
-    # entries = entries[:50]
     for e in entries:
         e.parse()
-    print('parsing entries time:', time.time() - start)
-    start = time.time()
+    for e in entries:
+        if e.date is None:
+            print(e.path)
     sorted_entries = sorted(entries, key=lambda x: x.date, reverse=True)
-    print('sorting entries time:', time.time() - start)
     return sorted_entries

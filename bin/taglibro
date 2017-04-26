@@ -1,0 +1,15 @@
+#!/bin/python
+
+import sys
+import taglibro
+import os.path
+
+
+if sys.argv[1] == 'get_config':
+    config = taglibro.config.get_config()
+    print('config in ', taglibro.config.default_path(), ' :')
+    print(config)
+elif sys.argv[1] == 'add_path':
+    if not os.path.exists(sys.argv[2]):
+        'path does no exist'
+    taglibro.config.add_folder(sys.argv[2])

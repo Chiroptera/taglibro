@@ -1,5 +1,5 @@
 from flask import request, render_template, jsonify, send_from_directory
-import taglibro.config as config
+import taglibro.config
 from taglibro import app
 from taglibro.taglibro import get_entry_list
 import time
@@ -10,6 +10,7 @@ import os
 import os.path
 
 entry_cache = (None, datetime.datetime.now() - datetime.timedelta(days=30))
+config = taglibro.config.get_config()
 
 @app.route('/prot')
 def prot():
@@ -39,11 +40,10 @@ def post_entry():
     if request.json is None:
         return 'no data sent', 400
 
-
     now = datetime.datetime.now()
 
     # create year and folder directories
-    base_dir = config.JOURNAL_PATHS[0]
+    base_dir = config['journal_paths'][0]
     year_folder = os.path.join(base_dir, str(now.year))
 
     month_str = str(now.day) if now.month >= 10 else '0' + str(now.month)

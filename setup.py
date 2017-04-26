@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='taglibro',
-    version='0.01',
+    version='0.02',
     description='simply journaling app',
     author='Diogo Silva',
     author_email='hi@diogoaos.eu',
@@ -12,5 +12,5 @@ setup(
     install_requires=[
         'flask', 'gevent', 'markdown2'
     ],
-    scripts=['bin/taglibro_app']
+    scripts=['bin/taglibro_app', 'bin/taglibro']
 )
