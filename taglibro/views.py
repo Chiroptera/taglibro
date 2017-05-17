@@ -12,9 +12,11 @@ import os.path
 entry_cache = (None, datetime.datetime.now() - datetime.timedelta(days=30))
 config = taglibro.config.get_config()
 
-@app.route('/prot')
-def prot():
+
+@app.route('/')
+def home():
     return send_from_directory('static', 'taglibro.html')
+
 
 @app.route('/entry', methods=['GET'])
 def get_entries():
@@ -26,17 +28,21 @@ def get_entries():
         header = {
                 #    'date': e.date.strftime('%d-%m-%Y %H:%M'),
                   'date': e.date,
-                  'tags': ', '.join(e.tags)}
+                  'tags': e.tags}
         start = time.time()
-        txt = markdown2.markdown(e.body)
-        de = {'header': header, 'body': txt, 'uuid': str(uuid.uuid4())}
+        body = {
+            'txt': e.body,
+            'markdown': markdown2.markdown(e.body)
+        }
+
+        de = {'header': header, 'body': body, 'uuid': str(uuid.uuid4())}
         dispatch_entries.append(de)
 
     return jsonify(dispatch_entries)
 
+
 @app.route('/entry', methods=['POST'])
 def post_entry():
-    print(request.json)
     if request.json is None:
         return 'no data sent', 400
 

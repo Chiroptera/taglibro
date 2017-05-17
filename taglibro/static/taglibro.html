@@ -14,18 +14,21 @@
       }
       #entry_list{
         height: 100%;
-        width: 100%;
+        width: 80%;
         /*height: 50%*/
         overflow-y: scroll;
       }
       #editor{
         height: 50%;
-        width: 100%;
+        width: 80%;
         /*height: 50%*/
         overflow-y: scroll;
       }
-      textarea {
-        width: 100%;
+      #tags{
+        height: 50%;
+        width: 80%;
+        /*height: 50%*/
+        overflow-y: scroll;
       }
     </style>
   </head>
@@ -34,9 +37,11 @@
     <div class="container-fluid">
       <h1> taglibro </h1>
       <div id="editor_col" class="col-md-6">
-        <textarea id="editor" class="field span12" rows=20 placeholder="taglibro"></textarea>
+        <p><span>date:</span><span id="date"></span><p>
+        <p><textarea id="tags" class="field span12" rows=1 placeholder="tags"></textarea><p>
+        <p><textarea id="editor" class="field span12" rows=20 placeholder="taglibro"></textarea><p>
         <!-- <div id="editor" class="editable" contenteditable="true">sdsdds</div> -->
-        <button id="btnSave" type="button" class="btn btn-primary btn-lg">Save</button>
+        <p><button id="btnSave" type="button" class="btn btn-primary btn-lg">Save</button></p>
         <!-- <button id="btn2" type="button" class="btn btn-primary btn-lg" onclick="clear();">Clear</button> -->
       </div>
 
